@@ -14,4 +14,8 @@
       <Folder Include="Controllers\" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Shortify.DataAccess\Shortify.DataAccess.csproj" />
+    </ItemGroup>
+
 </Project>
