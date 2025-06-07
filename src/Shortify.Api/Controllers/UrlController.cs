@@ -9,16 +9,16 @@ namespace Shortify.Api.Controllers;
 public class UrlController(IUrlShortenerService urlShortenerService) : ControllerBase
 {
     [HttpGet("redirect")]
-    public async Task<IActionResult> GetUrl([FromBody] GetUrlDto getUrlDto)
+    public async Task<IActionResult> GetUrl(string shortUrl)
     {
-        var url = await urlShortenerService.GetUrl(getUrlDto.ShortUrl);
+        var url = await urlShortenerService.GetUrl(shortUrl);
 
         if (url == null)
         {
             return NotFound();
         }
 
-        return RedirectPermanent(url);
+        return Ok(url);
     }
     
     [HttpPost("generate-short-url")]

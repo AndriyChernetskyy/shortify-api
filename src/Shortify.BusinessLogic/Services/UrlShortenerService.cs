@@ -8,7 +8,6 @@ namespace Shortify.BusinessLogic.Services;
 public class UrlShortenerService(IUrlMappingRepository urlMappingRepository, IMemoryCache cache, IBase62Converter base62Converter) : IUrlShortenerService
 {
     private const int MAX_URL_LENGTH = 4;
-    private const string BaseDomain = "https://";
 
     public async Task<string> ShortenUrl(string url)
     {
@@ -19,9 +18,7 @@ public class UrlShortenerService(IUrlMappingRepository urlMappingRepository, IMe
             return urlMapping.ShortUrl;
         }
 
-        var shortUrlCode = await GenerateUniqueShortUrl();
-        
-        var shortUrl = $"{BaseDomain}{shortUrlCode}";
+        var shortUrl = await GenerateUniqueShortUrl();
 
         await urlMappingRepository.AddUrlMapping(new UrlMapping
         {

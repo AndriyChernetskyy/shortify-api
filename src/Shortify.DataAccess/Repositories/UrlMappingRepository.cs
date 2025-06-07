@@ -35,19 +35,14 @@ public class UrlMappingRepository(ShortifyDbContext dbContext) : IUrlMappingRepo
     {
         var connection = dbContext.Database.GetDbConnection();
 
-        await using (connection)
-        {
-            if (connection.State != System.Data.ConnectionState.Open)
-                await connection.OpenAsync();
+        if (connection.State != System.Data.ConnectionState.Open)
+            await connection.OpenAsync();
 
-            await using var command = connection.CreateCommand();
-            command.CommandText = "SELECT nextval('url_id_seq')";
+        await using var command = connection.CreateCommand();
+        command.CommandText = "SELECT nextval('url_id_seq')";
 
-            var result = await command.ExecuteScalarAsync();
-            var nextVal = Convert.ToInt32(result);
-
-            return nextVal;
-        }
-
+        var result = await command.ExecuteScalarAsync();
+        return Convert.ToInt32(result);
     }
+
 }

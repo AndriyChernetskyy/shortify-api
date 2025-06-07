@@ -13,8 +13,12 @@ builder.Services.AddSwaggerGen();
 builder.Services.RegisterDataAccessDependencies(builder.Configuration.GetConnectionString("DefaultConnection")!);
 builder.Services.RegisterBusinessLogicDependencies();
 
-builder.Services.AddEntityFrameworkNpgsql().AddDbContext<ShortifyDbContext>(optionsBuilder =>
-    optionsBuilder.UseNpgsql(options => options.MigrationsAssembly("Shortify.DataAccess")));
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+builder.Services.AddDbContext<ShortifyDbContext>(options =>
+    options.UseNpgsql(connectionString,
+        npgsqlOptions => npgsqlOptions.MigrationsAssembly("Shortify.DataAccess"))
+);
 
 builder.Services.AddMemoryCache();
 

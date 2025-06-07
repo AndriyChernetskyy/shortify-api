@@ -24,10 +24,12 @@ public static class DataAccessExtensions
 
     private static void MigrateDatabase(string connectionString)
     {
-        using ShortifyDbContext dbContext = new(connectionString);
-        if (dbContext.Database.GetMigrations().Any())
-        {
-            dbContext.Database.Migrate();
-        }
+        var options = new DbContextOptionsBuilder<ShortifyDbContext>()
+            .UseNpgsql(connectionString)
+            .Options;
+
+        using var context = new ShortifyDbContext(options);
+        context.Database.Migrate();
     }
+
 }
