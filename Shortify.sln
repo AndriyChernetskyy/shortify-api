@@ -12,6 +12,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shortify.BusinessLogic", "s
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shortify.Domain", "src\Shortify.Domain\Shortify.Domain.csproj", "{5471259D-1BD2-424A-ABEE-1FABDDE3DAD8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shortify.BusinessLogicTests", "tests\Shortify.BusinessLogicTests\Shortify.BusinessLogicTests.csproj", "{FDEFF0DA-B926-49A4-BB63-FFE9B150502C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -22,6 +24,7 @@ Global
 		{53B13F7A-1383-4F7B-9843-BCF99DCDB2CF} = {AF02B751-B8B2-4722-B3EA-7EC08D45CE90}
 		{BB830012-CB8D-45B1-A84E-1B3459DF1AD3} = {AF02B751-B8B2-4722-B3EA-7EC08D45CE90}
 		{5471259D-1BD2-424A-ABEE-1FABDDE3DAD8} = {AF02B751-B8B2-4722-B3EA-7EC08D45CE90}
+		{FDEFF0DA-B926-49A4-BB63-FFE9B150502C} = {3A9210C5-3D87-48C2-99B4-78BF9DDC8682}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{CAFD34AA-14B2-4CFD-883C-0BFD110BBBC7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -40,5 +43,9 @@ Global
 		{5471259D-1BD2-424A-ABEE-1FABDDE3DAD8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5471259D-1BD2-424A-ABEE-1FABDDE3DAD8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5471259D-1BD2-424A-ABEE-1FABDDE3DAD8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FDEFF0DA-B926-49A4-BB63-FFE9B150502C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FDEFF0DA-B926-49A4-BB63-FFE9B150502C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FDEFF0DA-B926-49A4-BB63-FFE9B150502C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FDEFF0DA-B926-49A4-BB63-FFE9B150502C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

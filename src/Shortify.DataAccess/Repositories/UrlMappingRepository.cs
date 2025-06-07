@@ -1,0 +1,53 @@
+using Microsoft.EntityFrameworkCore;
+using Shortify.DataAccess.DataContext;
+using Shortify.DataAccess.Repositories.Contracts;
+using Shortify.Domain.Models;
+
+namespace Shortify.DataAccess.Repositories;
+
+public class UrlMappingRepository(ShortifyDbContext dbContext) : IUrlMappingRepository
+{
+    public async Task<string?> GetUrl(string shortUrl)
+    {
+        var result = await dbContext.UrlMappings.FirstOrDefaultAsync(x => x.ShortUrl == shortUrl);
+        
+        return result?.Url;
+    }
+
+    public async Task AddUrlMapping(UrlMapping urlMapping)
+    {
+        await dbContext.AddAsync(urlMapping);
+        
+        await dbContext.SaveChangesAsync();
+    }
+    
+    public async Task<bool> ShortUrlExists(string shortUrl)
+    {
+        return await dbContext.UrlMappings.AnyAsync(x => x.ShortUrl == shortUrl);
+    }
+    
+    public async Task<UrlMapping?> GetUrlMapping(string url)
+    {
+        return await dbContext.UrlMappings.FirstOrDefaultAsync(x => x.Url == url);   
+    }
+    
+    public async Task<int> GetNextUrlIdAsync()
+    {
+        var connection = dbContext.Database.GetDbConnection();
+
+        await using (connection)
+        {
+            if (connection.State != System.Data.ConnectionState.Open)
+                await connection.OpenAsync();
+
+            await using var command = connection.CreateCommand();
+            command.CommandText = "SELECT nextval('url_id_seq')";
+
+            var result = await command.ExecuteScalarAsync();
+            var nextVal = Convert.ToInt32(result);
+
+            return nextVal;
+        }
+
+    }
+}

@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Shortify.DataAccess.DataContext;
+using Shortify.DataAccess.Repositories;
+using Shortify.DataAccess.Repositories.Contracts;
 
 namespace Shortify.DataAccess.DependencyInjection;
 
@@ -17,6 +19,7 @@ public static class DataAccessExtensions
 
     private static void RegisterRepositories(this IServiceCollection services)
     {
+        services.AddTransient<IUrlMappingRepository, UrlMappingRepository>();
     }
 
     private static void MigrateDatabase(string connectionString)

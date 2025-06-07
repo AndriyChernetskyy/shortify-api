@@ -8,13 +8,11 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.2"/>
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.4" />
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Controllers\" />
-    </ItemGroup>
-
-    <ItemGroup>
+      <ProjectReference Include="..\Shortify.BusinessLogic\Shortify.BusinessLogic.csproj" />
       <ProjectReference Include="..\Shortify.DataAccess\Shortify.DataAccess.csproj" />
     </ItemGroup>
 

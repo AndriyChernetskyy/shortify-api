@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Shortify.DataAccess.FluentConfiguration;
+using Shortify.Domain.Models;
 
 namespace Shortify.DataAccess.DataContext;
 
@@ -15,6 +16,8 @@ public class ShortifyDbContext : DbContext
     {
         _connectionString = connectionString;
     }
+    
+    public DbSet<UrlMapping> UrlMappings { get; set; }
     
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
