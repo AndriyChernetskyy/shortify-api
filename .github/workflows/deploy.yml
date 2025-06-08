@@ -17,7 +17,7 @@ jobs:
           dotnet-version: '9.0.x'
 
       - name: Publish app
-        run: dotnet publish -c Release -o ./publish
+        run: dotnet publish ./src/Shortify.Api/Shortify.Api.csproj -c Release -o ./publish
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
