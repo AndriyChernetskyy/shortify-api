@@ -10,16 +10,6 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.RegisterDataAccessDependencies(builder.Configuration.GetConnectionString("DefaultConnection")!);
-builder.Services.RegisterBusinessLogicDependencies();
-
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-
-builder.Services.AddDbContext<ShortifyDbContext>(options =>
-    options.UseNpgsql(connectionString,
-        npgsqlOptions => npgsqlOptions.MigrationsAssembly("Shortify.DataAccess"))
-);
-
 builder.Services.AddMemoryCache();
 
 builder.Services.AddCors(options =>
@@ -30,6 +20,25 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader()
             .AllowAnyMethod());
 });
+
+if (builder.Environment.IsProduction())
+{
+    builder.Configuration.AddAzureAppConfiguration(options =>
+    {
+        var connectionString = builder.Configuration["AppConfigConnectionString"];
+        options.Connect(connectionString);
+    });
+}
+
+var connectionString = builder.Configuration.GetConnectionString("DbConnection");
+
+builder.Services.RegisterDataAccessDependencies(connectionString!);
+builder.Services.RegisterBusinessLogicDependencies();
+
+builder.Services.AddDbContext<ShortifyDbContext>(options =>
+    options.UseNpgsql(connectionString,
+        npgsqlOptions => npgsqlOptions.MigrationsAssembly("Shortify.DataAccess"))
+);
 
 var app = builder.Build();
 
