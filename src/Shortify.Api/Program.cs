@@ -42,6 +42,8 @@ builder.Services.AddDbContext<ShortifyDbContext>(options =>
 
 var app = builder.Build();
 
+app.MapGet("/health", () => Results.Ok("Healthy"));
+
 app.UseSwagger();
 app.UseSwaggerUI();
 
