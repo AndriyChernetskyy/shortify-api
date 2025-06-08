@@ -1,8 +1,10 @@
+using Shortify.Domain.Models;
+
 namespace Shortify.BusinessLogic.Services.Contracts;
 
 public interface IUrlShortenerService
 {
-    Task<string> ShortenUrl(string url);
+    Task<UrlMapping> CreateShortUrl(string url);
     
     Task<string?> GetUrl(string shortUrl);
 }

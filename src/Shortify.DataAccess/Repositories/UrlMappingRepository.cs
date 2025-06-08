@@ -14,11 +14,13 @@ public class UrlMappingRepository(ShortifyDbContext dbContext) : IUrlMappingRepo
         return result?.Url;
     }
 
-    public async Task AddUrlMapping(UrlMapping urlMapping)
+    public async Task<UrlMapping> CreateShortUrl(UrlMapping urlMapping)
     {
         await dbContext.AddAsync(urlMapping);
         
         await dbContext.SaveChangesAsync();
+
+        return urlMapping;
     }
     
     public async Task<bool> ShortUrlExists(string shortUrl)

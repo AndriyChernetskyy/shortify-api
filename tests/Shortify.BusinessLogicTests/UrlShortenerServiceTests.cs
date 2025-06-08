@@ -13,7 +13,6 @@ public class UrlShortenerServiceTests
     private readonly Mock<IMemoryCache> _cacheMock;
     private readonly Mock<IBase62Converter> _base62ConverterMock;
     private readonly UrlShortenerService _service;
-    private const string BaseDomain = "https://";
 
     public UrlShortenerServiceTests()
     {
@@ -31,7 +30,7 @@ public class UrlShortenerServiceTests
     {
         // Arrange
         const string originalUrl = "https://example.com";
-        const string existingShortUrl = $"{BaseDomain}abcd";
+        const string existingShortUrl = "abcd";
         var urlMapping = new UrlMapping 
         { 
             Url = originalUrl, 
@@ -47,11 +46,11 @@ public class UrlShortenerServiceTests
             .Returns(Mock.Of<ICacheEntry>());
 
         // Act
-        var result = await _service.ShortenUrl(originalUrl);
+        var result = await _service.CreateShortUrl(originalUrl);
 
         // Assert
-        Assert.Equal(existingShortUrl, result);
-        _urlMappingRepositoryMock.Verify(x => x.AddUrlMapping(It.IsAny<UrlMapping>()), Times.Never);
+        Assert.Equal(existingShortUrl, result.ShortUrl);;
+        _urlMappingRepositoryMock.Verify(x => x.CreateShortUrl(It.IsAny<UrlMapping>()), Times.Never);
     }
 
     [Fact]
@@ -61,7 +60,7 @@ public class UrlShortenerServiceTests
         var originalUrl = "https://example.com";
         var newId = 12345;
         var shortUrlCode = "b3k5";
-        var expectedShortUrl = $"{BaseDomain}{shortUrlCode}";
+        var expectedShortUrl = $"{shortUrlCode}";
 
         _urlMappingRepositoryMock
             .Setup(x => x.GetUrlMapping(originalUrl))
@@ -81,13 +80,13 @@ public class UrlShortenerServiceTests
             .Returns(Mock.Of<ICacheEntry>());
 
         // Act
-        var result = await _service.ShortenUrl(originalUrl);
+        var result = await _service.CreateShortUrl(originalUrl);
 
         // Assert
-        Assert.Equal(expectedShortUrl, result);
+        Assert.Equal(expectedShortUrl, result.ShortUrl);
     
         _urlMappingRepositoryMock.Verify(x => x.GetNextUrlIdAsync(), Times.Once);
-        _urlMappingRepositoryMock.Verify(x => x.AddUrlMapping(
+        _urlMappingRepositoryMock.Verify(x => x.CreateShortUrl(
                 It.Is<UrlMapping>(m => 
                     m.Url == originalUrl && 
                     m.ShortUrl == expectedShortUrl)), 
@@ -101,7 +100,7 @@ public class UrlShortenerServiceTests
     public async Task ShortenUrl_WithDifferentIds_ReturnsExpectedUrls(int id, string encodedValue)
     {
         // Arrange
-        var expectedUrl = $"{BaseDomain}{encodedValue}";
+        var expectedUrl = $"{encodedValue}";
         
         _urlMappingRepositoryMock
             .Setup(x => x.GetUrlMapping(It.IsAny<string>()))
@@ -121,10 +120,10 @@ public class UrlShortenerServiceTests
             .Returns(Mock.Of<ICacheEntry>());
 
         // Act
-        var result = await _service.ShortenUrl("https://example.com");
+        var result = await _service.CreateShortUrl("https://example.com");
 
         // Assert
-        Assert.Equal(expectedUrl, result);
+        Assert.Equal(expectedUrl, result.ShortUrl);;
         _base62ConverterMock.Verify(x => x.Encode(id, 4), Times.Once);
     }
 
@@ -134,7 +133,14 @@ public class UrlShortenerServiceTests
         const int id = 12345;
         const string encodedValue = "b3k5";
         const int expectedMaxLength = 4;
-        var expectedUrl = $"{BaseDomain}{encodedValue}";
+        var expectedUrl = $"{encodedValue}";
+
+        var mapping = new UrlMapping
+        {
+            Id = id,
+            Url = "https://example.com",
+            ShortUrl = encodedValue
+        };
         
         _urlMappingRepositoryMock
             .Setup(x => x.GetUrlMapping(It.IsAny<string>()))
@@ -143,8 +149,8 @@ public class UrlShortenerServiceTests
             .Setup(x => x.GetNextUrlIdAsync())
             .ReturnsAsync(id);
         _urlMappingRepositoryMock
-            .Setup(x => x.AddUrlMapping(It.IsAny<UrlMapping>()))
-            .Returns(Task.CompletedTask);
+            .Setup(x => x.CreateShortUrl(It.IsAny<UrlMapping>()))
+            .Returns(Task.FromResult(mapping));
         _base62ConverterMock
             .Setup(x => x.Encode(id, expectedMaxLength))
             .Returns(encodedValue);
@@ -154,13 +160,13 @@ public class UrlShortenerServiceTests
             .Returns(Mock.Of<ICacheEntry>());
 
         // Act
-        var result = await _service.ShortenUrl("https://example.com");
+        var result = await _service.CreateShortUrl("https://example.com");
 
         // Assert
-        Assert.Equal(expectedUrl, result);
+        Assert.Equal(mapping, result);
         _base62ConverterMock.Verify(x => x.Encode(id, expectedMaxLength), Times.Once);
         _urlMappingRepositoryMock.Verify(x => x.GetUrlMapping(It.IsAny<string>()), Times.Once);
         _urlMappingRepositoryMock.Verify(x => x.GetNextUrlIdAsync(), Times.Once);
-        _urlMappingRepositoryMock.Verify(x => x.AddUrlMapping(It.IsAny<UrlMapping>()), Times.Once);;
+        _urlMappingRepositoryMock.Verify(x => x.CreateShortUrl(It.IsAny<UrlMapping>()), Times.Once);;
     }
 }

@@ -6,7 +6,7 @@ public interface IUrlMappingRepository
 {
     Task<string?> GetUrl(string shortUrl);
 
-    Task AddUrlMapping(UrlMapping urlMapping);
+    Task<UrlMapping> CreateShortUrl(UrlMapping urlMapping);
 
     Task<bool> ShortUrlExists(string shortUrl);
 

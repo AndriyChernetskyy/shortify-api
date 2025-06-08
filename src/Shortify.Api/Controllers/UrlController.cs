@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Shortify.BusinessLogic.DTOs;
 using Shortify.BusinessLogic.Services.Contracts;
+using Shortify.BusinessLogic.Validation;
 
 namespace Shortify.Api.Controllers;
 
@@ -8,9 +9,17 @@ namespace Shortify.Api.Controllers;
 [Route("api/[controller]")]
 public class UrlController(IUrlShortenerService urlShortenerService) : ControllerBase
 {
-    [HttpGet("redirect")]
+    [HttpGet("full-url/{shortUrl}")]
     public async Task<IActionResult> GetUrl(string shortUrl)
     {
+        var validator = new GetUrlValidator();
+        var result = await validator.ValidateAsync(shortUrl);
+
+        if (!result.IsValid)
+        {
+            return BadRequest(result.Errors);
+        }
+        
         var url = await urlShortenerService.GetUrl(shortUrl);
 
         if (url == null)
@@ -24,8 +33,8 @@ public class UrlController(IUrlShortenerService urlShortenerService) : Controlle
     [HttpPost("generate-short-url")]
     public async Task<IActionResult> CreateShortUrl([FromBody] CreateShortenedUrlDto createShortenedUrlDto)
     {
-        var shortUrl = await urlShortenerService.ShortenUrl(createShortenedUrlDto.Url);
+        var urlMapping = await urlShortenerService.CreateShortUrl(createShortenedUrlDto.Url);
         
-        return Ok(shortUrl);
+        return Ok(urlMapping);
     }
 }
