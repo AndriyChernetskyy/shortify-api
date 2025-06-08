@@ -71,39 +71,6 @@ builder.Services.AddDbContext<ShortifyDbContext>(options =>
 
 var app = builder.Build();
 
-var logger = app.Services.GetRequiredService<ILogger<Program>>();
-
-// 5. Read and log the connection string
-var connectionString = builder.Configuration.GetConnectionString("DbConnection");
-if (string.IsNullOrEmpty(connectionString))
-{
-    logger.LogCritical("❌ DbConnection is EMPTY! Did you set ConnectionStrings__DbConnection as an environment variable?");
-    throw new InvalidOperationException("Connection string 'DbConnection' not found");
-}
-else
-{
-    var preview = connectionString.Length > 20
-        ? connectionString.Substring(0, 20) + "…"
-        : connectionString;
-    logger.LogInformation("✅ DbConnection loaded: {connPreview}", preview);
-}
-
-// 6. Apply EF Core migrations
-using (var scope = app.Services.CreateScope())
-{
-    var dbContext = scope.ServiceProvider.GetRequiredService<ShortifyDbContext>();
-    try
-    {
-        dbContext.Database.Migrate();
-        logger.LogInformation("✅ Database migrations applied successfully.");
-    }
-    catch (Exception ex)
-    {
-        logger.LogError(ex, "❌ Database migration failed.");
-        throw;
-    }
-}
-
 app.UseRouting();
 
 app.UseSwagger();

@@ -37,10 +37,4 @@ public class UrlController(IUrlShortenerService urlShortenerService) : Controlle
         
         return Ok(urlMapping);
     }
-    
-    [HttpGet]
-    public IActionResult Get()
-    {
-        return Ok("Hello World from Shortify API!");
-    }
 }
