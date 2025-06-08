@@ -10,6 +10,8 @@ var builder = WebApplication.CreateBuilder(args);
 if (builder.Environment.IsProduction())
 {
     var appConfigConn = builder.Configuration["AppConfigConnectionString"];
+    var appConfigEndpoint = builder.Configuration["AppConfigEndpoint"];
+
     if (!string.IsNullOrEmpty(appConfigConn))
     {
         builder.Configuration.AddAzureAppConfiguration(options =>
@@ -18,13 +20,17 @@ if (builder.Environment.IsProduction())
                 .Select("ConnectionStrings:*", builder.Environment.EnvironmentName)
         );
     }
-    else
+    else if (!string.IsNullOrEmpty(appConfigEndpoint))
     {
         builder.Configuration.AddAzureAppConfiguration(options =>
-            options.Connect(new Uri("https://shortify-prod.azconfig.io"), new DefaultAzureCredential())
+            options.Connect(new Uri(appConfigEndpoint), new DefaultAzureCredential())
                 .Select("ConnectionStrings:*", LabelFilter.Null)
                 .Select("ConnectionStrings:*", builder.Environment.EnvironmentName)
         );
+    }
+    else
+    {
+        throw new InvalidOperationException("Azure App Configuration is not configured: set AppConfigConnectionString or AppConfigEndpoint.");
     }
 }
 
@@ -53,17 +59,50 @@ if (builder.Environment.IsProduction())
     });
 }
 
-var connectionString = builder.Configuration.GetConnectionString("DbConnection");
+var cnt = builder.Configuration.GetConnectionString("DbConnection");
 
-builder.Services.RegisterDataAccessDependencies(connectionString!);
+builder.Services.RegisterDataAccessDependencies(cnt!);
 builder.Services.RegisterBusinessLogicDependencies();
 
 builder.Services.AddDbContext<ShortifyDbContext>(options =>
-    options.UseNpgsql(connectionString,
+    options.UseNpgsql(cnt,
         npgsqlOptions => npgsqlOptions.MigrationsAssembly("Shortify.DataAccess"))
 );
 
 var app = builder.Build();
+
+var logger = app.Services.GetRequiredService<ILogger<Program>>();
+
+// 5. Read and log the connection string
+var connectionString = builder.Configuration.GetConnectionString("DbConnection");
+if (string.IsNullOrEmpty(connectionString))
+{
+    logger.LogCritical("❌ DbConnection is EMPTY! Did you set ConnectionStrings__DbConnection as an environment variable?");
+    throw new InvalidOperationException("Connection string 'DbConnection' not found");
+}
+else
+{
+    var preview = connectionString.Length > 20
+        ? connectionString.Substring(0, 20) + "…"
+        : connectionString;
+    logger.LogInformation("✅ DbConnection loaded: {connPreview}", preview);
+}
+
+// 6. Apply EF Core migrations
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<ShortifyDbContext>();
+    try
+    {
+        dbContext.Database.Migrate();
+        logger.LogInformation("✅ Database migrations applied successfully.");
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "❌ Database migration failed.");
+        throw;
+    }
+}
 
 app.UseRouting();
 
