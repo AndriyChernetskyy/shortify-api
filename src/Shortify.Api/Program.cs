@@ -1,9 +1,32 @@
+using Azure.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration.AzureAppConfiguration;
 using Shortify.BusinessLogic.DependencyInjection;
 using Shortify.DataAccess.DataContext;
 using Shortify.DataAccess.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
+
+if (builder.Environment.IsProduction())
+{
+    var appConfigConn = builder.Configuration["AppConfigConnectionString"];
+    if (!string.IsNullOrEmpty(appConfigConn))
+    {
+        builder.Configuration.AddAzureAppConfiguration(options =>
+            options.Connect(appConfigConn)
+                .Select("ConnectionStrings:*", LabelFilter.Null)
+                .Select("ConnectionStrings:*", builder.Environment.EnvironmentName)
+        );
+    }
+    else
+    {
+        builder.Configuration.AddAzureAppConfiguration(options =>
+            options.Connect(new Uri("https://shortify-prod.azconfig.io"), new DefaultAzureCredential())
+                .Select("ConnectionStrings:*", LabelFilter.Null)
+                .Select("ConnectionStrings:*", builder.Environment.EnvironmentName)
+        );
+    }
+}
 
 builder.Services.AddControllers();
 
@@ -42,7 +65,7 @@ builder.Services.AddDbContext<ShortifyDbContext>(options =>
 
 var app = builder.Build();
 
-app.MapGet("/health", () => Results.Ok("Healthy"));
+app.UseRouting();
 
 app.UseSwagger();
 app.UseSwaggerUI();
@@ -53,7 +76,8 @@ app.UseCors("AllowAll");
 
 app.UseAuthorization();
 
-app.UseRouting();
 app.MapControllers();
+
+app.MapGet("/health", () => Results.Ok("Healthy"));
 
 app.Run();
